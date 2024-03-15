@@ -1,3 +1,4 @@
+using API;
 using API.Data;
 using Microsoft.EntityFrameworkCore;
 
@@ -12,7 +13,7 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 builder.Services.AddDbContext<DataContext>(optons => optons.UseSqlite(builder.Configuration.GetConnectionString("ConStr")));
-
+builder.Services.AddScoped<ITokenService,TokenService>();
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowAllOrigins",
