@@ -1,6 +1,10 @@
+using System.Text;
 using API;
 using API.Data;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
+using Microsoft.IdentityModel.Tokens;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -14,6 +18,16 @@ builder.Services.AddSwaggerGen();
 
 builder.Services.AddDbContext<DataContext>(optons => optons.UseSqlite(builder.Configuration.GetConnectionString("ConStr")));
 builder.Services.AddScoped<ITokenService,TokenService>();
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer(options => {
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuerSigningKey = true,
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["TokenKey"])),
+            ValidateIssuer = false,
+            ValidateAudience = false
+        };
+    });
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowAllOrigins",
@@ -38,6 +52,7 @@ app.UseCors("AllowAllOrigins");
 
 app.UseHttpsRedirection();
 
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
